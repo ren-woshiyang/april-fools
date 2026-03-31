@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>记住日期</title>
+  <style>
+    #intro {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      color: black;
+      text-align: center;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* 垂直居中 */
+      align-items: center;     /* 水平居中 */
+      padding: 20px;
+    }
+    #introText {
+      font-size: 28px;        /* 大字体，更醒目 */
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+    #loadingText {
+      font-size: 20px;        /* 清晰可见 */
+      margin-top: 10px;
+    }
+    body {
+      background: white;
+      color: rgb(0, 0, 0);
+      text-align: center;
+      font-family: "Helvetica", "Arial", sans-serif;
+    }
+    img {
+      width: 90%;           /* 占屏幕宽度的90% */
+      max-height: 80vh;   /* 80%屏幕高度 */
+      object-fit: contain; /* 保持比例，完整显示 */
+      display: block;
+      margin: 10px auto;
+    }
+    .text {
+      margin: 20px;
+      font-size: 20px;
+    }
+    button {
+      padding: 15px 30px;     /* 更大更好点 */
+      margin: 15px auto;      /* 上下间距 + 居中 */
+      font-size: 18px;        /* 字更大看得清楚 */
+      cursor: pointer;
+      display: block;          /* 每个按钮独占一行 */
+      min-width: 200px;       /* 最小宽度，防止太小 */
+      border-radius: 12px;    /* 圆角按钮 */
+      background-color: #0e3b79; /* 绿色按钮 */
+      color: white;
+      border: none;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+    }
+
+    /* 按钮点击小动画 */
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body>
+<div id="intro">
+  <div style="margin-top:20%;">
+    <h2>你真的要看吗！？？</h2>
+    <p id="loadingText">正在加载中...</p>
+  </div>
+</div>
+
+<img id="image" src="pic1.jpg">
+
+<div class="text" id="text">
+  你是来祝我生日快乐的吗？
+</div>
+
+<div id="choices">
+  <button onclick="chooseYes()">是的，生日快乐！！</button>
+  <button onclick="chooseNo()">不是</button>
+</div>
+
+<script>
+function chooseYes() {
+document.getElementById("image").src = "pic2.jpg";
+document.getElementById("text").innerText = "谢谢你，这些送给你";
+
+document.getElementById("choices").innerHTML =
+'<button onclick="showGifts()">谢谢</button>';
+}
+
+function chooseNo() {
+document.getElementById("image").src = "pic3.jpg";
+document.getElementById("text").innerText = "美丽的lady！";
+
+document.getElementById("choices").innerHTML =
+'<button onclick="nextStep()">你见过一些奇怪的照片吗</button>';
+}
+function showGifts() {
+document.getElementById("text").innerText = "别告诉山治,拜托啦";
+
+document.getElementById("image").style.display = "none";
+
+document.getElementById("choices").innerHTML =
+'<img src="gft1.jpg" style="width:150px;margin:10px;">' +
+'<img src="gft2.jpg" style="width:150px;margin:10px;">' +
+'<img src="gft3.jpg" style="width:150px;margin:10px;">';
+}
+
+function nextStep() {
+document.getElementById("image").src = "pic4.jpg";
+document.getElementById("text").innerText = "等等!!";
+
+document.getElementById("choices").innerHTML =
+'<button onclick="alert(\'愚人节快乐！\')">……</button>';
+}
+setTimeout(() => {
+document.getElementById("intro").style.display = "none";
+}, 2500);
+let dots = 0;
+setInterval(() => {
+dots = (dots + 1) % 4;
+document.getElementById("loadingText").innerText =
+"正在加载中" + ".".repeat(dots);
+}, 500);
+
+</script>
+
+</body>
+</html>
