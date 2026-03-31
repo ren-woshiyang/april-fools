@@ -21,12 +21,24 @@
       text-align: center; font-family: -apple-system, "Helvetica", "Arial", sans-serif;
       margin: 0; padding-bottom: 50px;
     }
+    /* 图片样式 */
     img {
       width: 90%; max-height: 60vh; object-fit: contain;
       display: block; margin: 20px auto; border-radius: 10px;
+      /* 默认隐藏，等加载好了再显示，防止闪烁 */
+      opacity: 0; 
+      transition: opacity 0.5s ease-in-out; /* 淡入效果 */
+    }
+    /* 这个类用来显示图片 */
+    img.loaded {
+      opacity: 1;
     }
     .text {
       margin: 25px 20px; font-size: 24px; line-height: 1.5; font-weight: bold;
+    }
+    /* 按钮区域样式 */
+    #choices {
+      min-height: 60px; /* 预留高度，防止按钮出来时页面跳动 */
     }
     button {
       width: 85%; padding: 18px 0; margin: 15px auto;
@@ -58,52 +70,79 @@
 </div>
 
 <script>
-// --- 核心修复：预加载图片 ---
-// 网页一打开，就在后台悄悄下载 pic2, pic3, pic4
-// 这样点击按钮时，图片是瞬间显示的，不会卡顿
-function preloadImages() {
-  const images = ['pic2.jpg', 'pic3.jpg', 'pic4.jpg', 'gft1.jpg', 'gft2.jpg', 'gft3.jpg'];
-  images.forEach(src => {
-    const img = new Image();
-    img.src = src;
-  });
-}
-// 页面加载完成后立即执行预加载
-window.addEventListener('load', preloadImages);
+// 获取图片元素
+const imgElement = document.getElementById("image");
 
-// --- 核心修复：防缓存函数 ---
-// 给图片地址加上当前时间，强制浏览器下载新图
-function getImgSrc(name) {
-  return name + '?t=' + new Date().getTime();
+// 核心功能：加载图片并同步显示
+// src: 图片路径, callback: 图片加载完成后要执行的代码
+function loadNextImage(src, callback) {
+  // 1. 先把当前图片隐藏（透明度设为0），但保留位置
+  imgElement.classList.remove("loaded");
+  
+  // 2. 创建一个新的图片对象在内存里加载
+  const tempImg = new Image();
+  tempImg.src = src + '?t=' + new Date().getTime(); // 加上时间戳防止缓存
+  
+  // 3. 监听：当新图片真的下载完后
+  tempImg.onload = function() {
+    imgElement.src = src; // 把主图换成新图
+    imgElement.classList.add("loaded"); // 让图片淡入显示
+    
+    // 4. 图片显示后，再执行按钮显示的代码
+    if (callback) callback();
+  };
 }
 
 function chooseYes() {
-  document.getElementById("image").src = getImgSrc("pic2.jpg");
-  document.getElementById("text").innerText = "谢谢你，这些送给你";
-  document.getElementById("choices").innerHTML = '<button onclick="showGifts()">谢谢</button>';
+  // 先清空按钮，防止用户重复点击
+  document.getElementById("choices").innerHTML = '';
+  
+  loadNextImage("pic2.jpg", function() {
+    // 图片加载完后，更新文字和按钮
+    document.getElementById("text").innerText = "谢谢你，这些送给你";
+    document.getElementById("choices").innerHTML = '<button onclick="showGifts()">谢谢</button>';
+  });
 }
 
 function chooseNo() {
-  document.getElementById("image").src = getImgSrc("pic3.jpg");
-  document.getElementById("text").innerText = "美丽的lady！";
-  document.getElementById("choices").innerHTML = '<button onclick="nextStep()">你见过一些奇怪的照片吗</button>';
+  document.getElementById("choices").innerHTML = '';
+  
+  loadNextImage("pic3.jpg", function() {
+    document.getElementById("text").innerText = "美丽的lady！";
+    document.getElementById("choices").innerHTML = '<button onclick="nextStep()">你见过一些奇怪的照片吗</button>';
+  });
 }
 
 function showGifts() {
+  document.getElementById("choices").innerHTML = '';
   document.getElementById("text").innerText = "别告诉山治,拜托啦";
-  document.getElementById("image").style.display = "none";
-  document.getElementById("choices").innerHTML =
-  '<img src="' + getImgSrc("gft1.jpg") + '" style="width:180px;margin:10px;">' +
-  '<img src="' + getImgSrc("gft2.jpg") + '" style="width:180px;margin:10px;">' +
-  '<img src="' + getImgSrc("gft3.jpg") + '" style="width:180px;margin:10px;">';
+  
+  // 这里稍微特殊一点，我们要隐藏主图，显示小图
+  // 为了体验好，我们等一小会儿再切换，让用户感觉更自然
+  setTimeout(() => {
+    imgElement.style.display = "none";
+    document.getElementById("choices").innerHTML =
+    '<img src="gft1.jpg" style="width:180px;margin:10px;">' +
+    '<img src="gft2.jpg" style="width:180px;margin:10px;">' +
+    '<img src="gft3.jpg" style="width:180px;margin:10px;">';
+  }, 300);
 }
 
 function nextStep() {
-  document.getElementById("image").src = getImgSrc("pic4.jpg");
-  document.getElementById("text").innerText = "等等!!";
-  document.getElementById("choices").innerHTML = '<button onclick="alert(\'愚人节快乐！\')">……</button>';
+  document.getElementById("choices").innerHTML = '';
+  
+  loadNextImage("pic4.jpg", function() {
+    document.getElementById("text").innerText = "等等!!";
+    document.getElementById("choices").innerHTML = '<button onclick="alert(\'愚人节快乐！\')">……</button>';
+  });
 }
 
+// 初始化：页面加载完让第一张图显示出来
+window.addEventListener('load', function() {
+  imgElement.classList.add("loaded");
+});
+
+// 遮罩层逻辑
 setTimeout(() => {
   document.getElementById("intro").style.display = "none";
 }, 2500);
